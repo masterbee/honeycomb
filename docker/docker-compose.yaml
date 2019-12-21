@@ -1,0 +1,47 @@
+version: '3'
+
+services:
+  # ----------------------------------
+  #   MOJO API INSTANCES
+  # ----------------------------------
+  private:
+    build:
+      context: ./perl
+    volumes:
+      - ../private/api:/usr/src/local
+      - ./perl/logs/private:/usr/src/local/log
+    networks:
+      - appnet
+    command: >
+        bash -c "rm -f *.pid && /usr/local/bin/hypnotoad -f index.toad"
+  public:
+    build:
+      context: ./perl
+    volumes:
+      - ../public/api:/usr/src/local
+      - ./perl/logs/public:/usr/src/local/log
+    networks:
+      - appnet
+    command: >
+        bash -c "rm -f *.pid && /usr/local/bin/hypnotoad -f index.toad"
+  # ----------------------------------
+  #   DATABASE
+  # ----------------------------------
+  # ----------------------------------
+  #   WEB SERVER
+  # ----------------------------------
+  nginx:
+    build:
+      context: ./nginx
+    volumes:
+      - ../public:/var/www/public
+      - ../private:/var/www/private
+      - ./nginx/logs:/var/www/logs
+    networks:
+      - appnet
+    ports:
+      - 80:80
+
+networks:
+  appnet:
+    driver: bridge
